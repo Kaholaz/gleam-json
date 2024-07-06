@@ -111,10 +111,8 @@ pub fn run_parser(
         iterator.Done -> Error(Nil)
         iterator.Next("{", tokens) ->
           run_parser(JsonObjectParser(dict.new()), tokens)
-        iterator.Next("[", tokens) ->
-          run_parser(JsonArrayParser(list.new()), tokens)
-        iterator.Next("\"", tokens) ->
-          run_parser(JsonStringParser(list.new()), tokens)
+        iterator.Next("[", tokens) -> run_parser(JsonArrayParser([]), tokens)
+        iterator.Next("\"", tokens) -> run_parser(JsonStringParser([]), tokens)
         iterator.Next("t", tokens) -> run_parser(JsonTrueParser, tokens)
         iterator.Next("f", tokens) -> run_parser(JsonFalseParser, tokens)
         iterator.Next("n", tokens) -> run_parser(JsonNullParser, tokens)
@@ -175,7 +173,64 @@ pub fn run_parser(
     JsonNumberParser(number_parser) ->
       parse_number(number_parser, tokens)
       |> result.map(fn(ok) { #(JsonNumber(ok.0), ok.1) })
-    _ -> Error(Nil)
+    JsonArrayParser(array) -> {
+      use #(value, tokens) <- result.try(run_parser(JsonValueParser, tokens))
+      case
+        tokens
+        |> step_ignore_whitespace
+      {
+        iterator.Next(",", tokens) ->
+          run_parser(JsonArrayParser([value, ..array]), tokens)
+        iterator.Next("]", tokens) ->
+          Ok(#(
+            JsonArray(
+              [value, ..array]
+              |> list.reverse,
+            ),
+            tokens,
+          ))
+        _ -> Error(Nil)
+      }
+    }
+    JsonObjectParser(dict) -> {
+      use #(key, tokens) <- result.try(run_parser(JsonValueParser, tokens))
+      use key <- result.try(case key {
+        JsonString(string) -> Ok(string)
+        _ -> Error(Nil)
+      })
+
+      case
+        tokens
+        |> step_ignore_whitespace
+      {
+        iterator.Next(":", tokens) -> {
+          use #(value, tokens) <- result.try(run_parser(JsonValueParser, tokens))
+          case
+            tokens
+            |> step_ignore_whitespace
+          {
+            iterator.Next(",", tokens) ->
+              run_parser(
+                JsonObjectParser(
+                  dict
+                  |> dict.insert(key, value),
+                ),
+                tokens,
+              )
+            iterator.Next("}", tokens) ->
+              Ok(#(
+                JsonObject(
+                  dict
+                  |> dict.insert(key, value),
+                ),
+                tokens,
+              ))
+            _ -> Error(Nil)
+          }
+        }
+        _ -> Error(Nil)
+      }
+    }
   }
 }
 

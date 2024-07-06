@@ -1,5 +1,6 @@
 import gleeunit
 import gleeunit/should
+import gleam/dict
 import json
 
 pub fn main() {
@@ -64,4 +65,20 @@ pub fn parse_negative_exponent_test() {
   "123e-2"
   |> json.parse_json
   |> should.equal(Ok(json.JsonNumber(1.23)))
+}
+
+pub fn parse_string_array_test() {
+  "[\"hello\", \"world\"]"
+  |> json.parse_json
+  |> should.equal(
+    Ok(json.JsonArray([json.JsonString("hello"), json.JsonString("world")])),
+  )
+}
+
+pub fn parse_string_object_test() {
+  "{\"hello\": \"world\"}"
+  |> json.parse_json
+  |> should.equal(
+    Ok(json.JsonObject(dict.from_list([#("hello", json.JsonString("world"))]))),
+  )
 }
