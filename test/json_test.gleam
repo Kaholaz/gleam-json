@@ -20,9 +20,9 @@ pub fn parse_true_test() {
 }
 
 pub fn parse_false_test() {
-  "true"
+  "false"
   |> json.parse_json
-  |> should.equal(Ok(json.JsonBool(True)))
+  |> should.equal(Ok(json.JsonBool(False)))
 }
 
 pub fn parse_string_test() {
