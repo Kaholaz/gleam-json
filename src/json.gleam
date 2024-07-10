@@ -5,6 +5,7 @@ import gleam/result
 import gleam/list
 import gleam/float
 import gleam/int
+import gleam/io
 
 pub type JsonValue {
   JsonObject(Dict(String, JsonValue))
@@ -166,6 +167,30 @@ pub fn run_parser(
             ),
             tokens,
           ))
+        iterator.Next("\\", tokens) -> {
+          case
+            tokens
+            |> iterator.step
+          {
+            iterator.Next("\"", tokens) ->
+              run_parser(JsonStringParser(["\"", ..parsed_tokens]), tokens)
+            iterator.Next("\\", tokens) ->
+              run_parser(JsonStringParser(["\\", ..parsed_tokens]), tokens)
+            iterator.Next("/", tokens) ->
+              run_parser(JsonStringParser(["/", ..parsed_tokens]), tokens)
+            iterator.Next("b", tokens) ->
+              run_parser(JsonStringParser(["\u{8}", ..parsed_tokens]), tokens)
+            iterator.Next("f", tokens) ->
+              run_parser(JsonStringParser(["\f", ..parsed_tokens]), tokens)
+            iterator.Next("n", tokens) ->
+              run_parser(JsonStringParser(["\n", ..parsed_tokens]), tokens)
+            iterator.Next("r", tokens) ->
+              run_parser(JsonStringParser(["\r", ..parsed_tokens]), tokens)
+            iterator.Next("t", tokens) ->
+              run_parser(JsonStringParser(["\t", ..parsed_tokens]), tokens)
+            _ -> Error(Nil)
+          }
+        }
         iterator.Next(token, tokens) ->
           run_parser(JsonStringParser([token, ..parsed_tokens]), tokens)
       }

@@ -31,6 +31,54 @@ pub fn parse_string_test() {
   |> should.equal(Ok(json.JsonString("foo")))
 }
 
+pub fn parse_escaped_quote_test() {
+  "\"\\\"\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\"")))
+}
+
+pub fn parse_escaped_slash_test() {
+  "\"\\/\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("/")))
+}
+
+pub fn parse_escaped_backslash_test() {
+  "\"\\\\\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\\")))
+}
+
+pub fn parse_backspace_test() {
+  "\"\\b\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\u{0008}")))
+}
+
+pub fn parse_formfeed_test() {
+  "\"\\f\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\f")))
+}
+
+pub fn parse_linefeed_test() {
+  "\"\\n\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\n")))
+}
+
+pub fn parse_return_test() {
+  "\"\\r\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\r")))
+}
+
+pub fn parse_tab_test() {
+  "\"\\t\""
+  |> json.parse_json
+  |> should.equal(Ok(json.JsonString("\t")))
+}
+
 pub fn parse_digit_test() {
   "123"
   |> json.parse_json
