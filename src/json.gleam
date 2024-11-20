@@ -1,11 +1,10 @@
 import gleam/dict.{type Dict}
-import gleam/iterator.{type Iterator}
-import gleam/string
-import gleam/result
-import gleam/list
 import gleam/float
 import gleam/int
-import gleam/io
+import gleam/iterator.{type Iterator}
+import gleam/list
+import gleam/result
+import gleam/string
 
 pub type JsonValue {
   JsonObject(Dict(String, JsonValue))
