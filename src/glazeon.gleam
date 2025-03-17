@@ -499,7 +499,7 @@ fn digit_list_to_float(digits) {
   |> list.reverse
   |> string.concat
   |> int.parse
-  |> result.map(int.to_float(_))
+  |> result.map(int.to_float)
 }
 
 pub fn is_number(token: String) -> Bool {
