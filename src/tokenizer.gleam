@@ -242,7 +242,7 @@ fn parse_exponent(
         True ->
           case next_input |> string.pop_grapheme() {
             Ok(#("-", input)) -> {
-              let #(chars, input) = consume_digits(["-", ..chars], input)
+              let #(chars, input) = consume_digits(["e-", ..chars], input)
               case chars |> list.first() {
                 Ok("-") -> Error(Nil)
                 Error(_) ->
@@ -251,7 +251,7 @@ fn parse_exponent(
               }
             }
             Ok(#("+", input)) -> {
-              let #(chars, input) = consume_digits(["+", ..chars], input)
+              let #(chars, input) = consume_digits(["e+", ..chars], input)
               case chars |> list.first() {
                 Ok("+") -> Error(Nil)
                 Error(_) ->
@@ -261,7 +261,7 @@ fn parse_exponent(
             }
             Error(_) -> Error(Nil)
             _ -> {
-              let #(chars, input) = consume_digits(chars, next_input)
+              let #(chars, input) = consume_digits(["e", ..chars], next_input)
               case chars |> list.first() {
                 Ok("e") -> Error(Nil)
                 Ok("E") -> Error(Nil)
