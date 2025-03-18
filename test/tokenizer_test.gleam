@@ -113,3 +113,9 @@ pub fn parse_negative_exponent_test() {
   |> tokenizer.tokenize()
   |> should.equal(Ok([tokenizer.Value(tokenizer.Number("123e-2"))]))
 }
+
+pub fn parse_dot_test() {
+  ".123"
+  |> tokenizer.tokenize()
+  |> should.equal(Error(Nil))
+}
