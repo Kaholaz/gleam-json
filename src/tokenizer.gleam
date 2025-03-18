@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
@@ -170,8 +171,15 @@ fn parse_string_inner(
                 "r" -> parse_string_inner(["\r", ..out], input)
                 "t" -> parse_string_inner(["\t", ..out], input)
 
-                "u" -> todo
-
+                "u" -> {
+                  use #(codepoints, input) <- result.try(
+                    parse_unicode_codepoint([], input),
+                  )
+                  parse_string_inner(
+                    [codepoints |> string.from_utf_codepoints(), ..out],
+                    input,
+                  )
+                }
                 _ -> Error(Nil)
               }
             }
@@ -181,6 +189,26 @@ fn parse_string_inner(
         char -> parse_string_inner([char, ..out], input)
       }
     }
+  }
+}
+
+fn parse_unicode_codepoint(
+  out: List(UtfCodepoint),
+  input: String,
+) -> Result(#(List(UtfCodepoint), String), Nil) {
+  let hex_digits = string.slice(input, 0, 4)
+  case hex_digits |> string.length() {
+    4 -> {
+      use codepoint <- result.try(hex_digits |> int.base_parse(16))
+      use codepoint <- result.try(codepoint |> string.utf_codepoint())
+      let out = [codepoint, ..out]
+      let input = input |> string.drop_left(4)
+      case input |> string.slice(0, 2) {
+        "\\u" -> parse_unicode_codepoint(out, input |> string.drop_left(2))
+        _ -> Ok(#(out |> list.reverse(), input))
+      }
+    }
+    _ -> Error(Nil)
   }
 }
 

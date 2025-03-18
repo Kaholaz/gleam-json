@@ -114,6 +114,12 @@ pub fn parse_negative_exponent_test() {
   |> should.equal(Ok([tokenizer.Value(tokenizer.Number("123e-2"))]))
 }
 
+pub fn parse_unicode_escape_sequence_test() {
+  "\"\\u0048\\u0065\\u006C\\u006C\\u006F\""
+  |> tokenizer.tokenize()
+  |> should.equal(Ok([tokenizer.Value(tokenizer.String("Hello"))]))
+}
+
 pub fn parse_dot_test() {
   ".123"
   |> tokenizer.tokenize()
